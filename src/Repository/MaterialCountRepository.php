@@ -4,7 +4,6 @@ namespace WechatOfficialAccountMaterialBundle\Repository;
 
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
-use DoctrineEnhanceBundle\Repository\CommonRepositoryAware;
 use WechatOfficialAccountMaterialBundle\Entity\MaterialCount;
 
 /**
@@ -15,8 +14,6 @@ use WechatOfficialAccountMaterialBundle\Entity\MaterialCount;
  */
 class MaterialCountRepository extends ServiceEntityRepository
 {
-    use CommonRepositoryAware;
-
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, MaterialCount::class);
