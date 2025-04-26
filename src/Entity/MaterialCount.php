@@ -4,7 +4,6 @@ namespace WechatOfficialAccountMaterialBundle\Entity;
 
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
-use DoctrineEnhanceBundle\Traits\PrimaryKeyAware;
 use Symfony\Component\Serializer\Attribute\Groups;
 use Tourze\DoctrineIndexedBundle\Attribute\IndexColumn;
 use Tourze\DoctrineTimestampBundle\Attribute\CreateTimeColumn;
@@ -23,7 +22,17 @@ use WechatOfficialAccountMaterialBundle\Repository\MaterialCountRepository;
 #[ORM\Table(name: 'wechat_official_account_material_count', options: ['comment' => '素材总数'])]
 class MaterialCount
 {
-    use PrimaryKeyAware;
+    #[ListColumn(order: -1)]
+    #[ExportColumn]
+    #[ORM\Id]
+    #[ORM\GeneratedValue]
+    #[ORM\Column(type: Types::INTEGER, options: ['comment' => 'ID'])]
+    private ?int $id = 0;
+
+    public function getId(): ?int
+    {
+        return $this->id;
+    }
 
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
