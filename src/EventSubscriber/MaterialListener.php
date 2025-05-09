@@ -5,10 +5,9 @@ namespace WechatOfficialAccountMaterialBundle\EventSubscriber;
 use Doctrine\Bundle\DoctrineBundle\Attribute\AsEntityListener;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Events;
-use FileSystemBundle\Service\MountManager;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 use WechatOfficialAccountBundle\Service\OfficialAccountClient;
 use WechatOfficialAccountMaterialBundle\Entity\Material;
-use WechatOfficialAccountMaterialBundle\Repository\MaterialRepository;
 use WechatOfficialAccountMaterialBundle\Request\AddMaterialRequest;
 use WechatOfficialAccountMaterialBundle\Request\DeleteMaterialRequest;
 
@@ -24,9 +23,7 @@ class MaterialListener
 {
     public function __construct(
         private readonly OfficialAccountClient $client,
-        private readonly MountManager $mountManager,
         private readonly EntityManagerInterface $entityManager,
-        private readonly MaterialRepository $materialRepository,
     ) {
     }
 
@@ -42,7 +39,7 @@ class MaterialListener
             return;
         }
 
-        $uploadFile = $this->mountManager->generateUploadFileFromUrl($material->getLocalFile());
+        $uploadFile = $this->generateUploadFileFromUrl($material->getLocalFile());
 
         $request = new AddMaterialRequest();
         $request->setAccount($material->getAccount());
@@ -55,6 +52,28 @@ class MaterialListener
 
         $this->entityManager->persist($material);
         $this->entityManager->flush();
+    }
+
+    /**
+     * 读取远程URL的内容，并生成一个上传文件对象
+     */
+    private function generateUploadFileFromUrl(string $url): UploadedFile
+    {
+        $content = file_get_contents($url);
+        $file = tempnam(sys_get_temp_dir(), 'upload_file');
+        file_put_contents($file, $content);
+        $name = basename($url);
+
+        return $this->generateUploadFileFromPath($file, $name);
+    }
+
+    private function generateUploadFileFromPath(string $path, ?string $name = null): UploadedFile
+    {
+        if (null === $name) {
+            $name = basename($path);
+        }
+
+        return new UploadedFile($path, $name);
     }
 
     /**
