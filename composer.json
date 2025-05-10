@@ -17,6 +17,7 @@
     "symfony/framework-bundle": "^6.4",
     "symfony/http-foundation": "^6.4",
     "symfony/http-kernel": "^6.4",
+    "symfony/property-access": "^6.4",
     "symfony/yaml": "^6.4 || ^7.1",
     "tourze/doctrine-indexed-bundle": "0.0.*",
     "tourze/doctrine-ip-bundle": "0.0.*",
@@ -25,6 +26,7 @@
     "tourze/easy-admin-attribute": "0.1.*",
     "tourze/enum-extra": "~0.0.5",
     "tourze/symfony-cron-job-bundle": "0.1.*",
+    "tourze/symfony-snowflake-bundle": "0.0.*",
     "tourze/wechat-official-account-bundle": "0.1.*"
   },
   "require-dev": {
