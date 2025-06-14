@@ -2,10 +2,18 @@
 
 namespace WechatOfficialAccountMaterialBundle;
 
+use Doctrine\Bundle\DoctrineBundle\DoctrineBundle;
 use Symfony\Component\HttpKernel\Bundle\Bundle;
-use Tourze\EasyAdmin\Attribute\Permission\AsPermission;
+use Tourze\BundleDependency\BundleDependencyInterface;
+use WechatOfficialAccountBundle\WechatOfficialAccountBundle;
 
-#[AsPermission(title: '公众号素材')]
-class WechatOfficialAccountMaterialBundle extends Bundle
+class WechatOfficialAccountMaterialBundle extends Bundle implements BundleDependencyInterface
 {
+    public static function getBundleDependencies(): array
+    {
+        return [
+            DoctrineBundle::class => ['all' => true],
+            WechatOfficialAccountBundle::class => ['all' => true],
+        ];
+    }
 }
