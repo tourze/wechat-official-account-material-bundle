@@ -8,9 +8,6 @@ use Tourze\DoctrineIpBundle\Attribute\CreateIpColumn;
 use Tourze\DoctrineIpBundle\Attribute\UpdateIpColumn;
 use Tourze\DoctrineSnowflakeBundle\Service\SnowflakeIdGenerator;
 use Tourze\DoctrineTimestampBundle\Traits\TimestampableAware;
-use Tourze\EasyAdmin\Attribute\Column\ExportColumn;
-use Tourze\EasyAdmin\Attribute\Column\ListColumn;
-use Tourze\EasyAdmin\Attribute\Permission\AsPermission;
 use WechatOfficialAccountBundle\Entity\Account;
 use WechatOfficialAccountMaterialBundle\Enum\MaterialType;
 use WechatOfficialAccountMaterialBundle\Repository\MaterialRepository;
@@ -21,14 +18,11 @@ use WechatOfficialAccountMaterialBundle\Repository\MaterialRepository;
  * 最近更新：永久图片素材新增后，将带有URL返回给开发者，开发者可以在腾讯系域名内使用（腾讯系域名外使用，图片将被屏蔽）。
  * 公众号的素材库保存总数量有上限：图文消息素材、图片素材上限为100000，其他类型为1000。
  */
-#[AsPermission(title: '永久素材')]
 #[ORM\Entity(repositoryClass: MaterialRepository::class)]
 #[ORM\Table(name: 'wechat_official_account_material', options: ['comment' => '永久素材'])]
-class Material
+class Material implements \Stringable
 {
     use TimestampableAware;
-    #[ExportColumn]
-    #[ListColumn(order: -1, sorter: true)]
     #[ORM\Id]
     #[ORM\GeneratedValue(strategy: 'CUSTOM')]
     #[ORM\CustomIdGenerator(SnowflakeIdGenerator::class)]
@@ -45,16 +39,13 @@ class Material
     #[ORM\Column(length: 120, nullable: true, options: ['comment' => '永久素材的media_id'])]
     private ?string $mediaId = null;
 
-    #[ORM\Column(length: 120, nullable: true)]
+    #[ORM\Column(length: 120, nullable: true, options: ['comment' => '素材名称'])]
     private ?string $name = null;
 
-    /**
-     * 仅新增图片素材时会返回该字段
-     */
     #[ORM\Column(length: 255, nullable: true, options: ['comment' => '图片素材的图片URL'])]
     private ?string $url = null;
 
-    #[ORM\Column(nullable: true)]
+    #[ORM\Column(nullable: true, options: ['comment' => '素材内容'])]
     private ?array $content = null;
 
     #[ORM\Column(length: 255, nullable: true, options: ['comment' => '本地文件路径'])]
@@ -73,6 +64,11 @@ class Material
     public function getId(): ?string
     {
         return $this->id;
+    }
+
+    public function __toString(): string
+    {
+        return $this->name ?? $this->mediaId ?? (string) $this->id;
     }
 
     public function isSyncing(): bool

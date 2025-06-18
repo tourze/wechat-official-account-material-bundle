@@ -23,6 +23,7 @@ use WechatOfficialAccountMaterialBundle\Request\BatchGetMaterialRequest;
 )]
 class SyncMaterialCommand extends Command
 {
+    public const NAME = 'wechat-official-account:material:sync';
     public function __construct(
         private readonly OfficialAccountClient $client,
         private readonly EntityManagerInterface $entityManager,
@@ -43,9 +44,10 @@ class SyncMaterialCommand extends Command
 
         // 获取需要同步的公众号列表
         $accounts = [];
-        if ($accountId = $input->getOption('account-id')) {
+        $accountId = $input->getOption('account-id');
+        if ($accountId !== null) {
             $account = $this->accountRepository->find($accountId);
-            if (!$account) {
+            if ($account === null) {
                 $io->error(sprintf('公众号 %s 不存在', $accountId));
 
                 return Command::FAILURE;
@@ -105,12 +107,11 @@ class SyncMaterialCommand extends Command
             'mediaId' => $item['media_id'],
         ]);
 
-        if (!$material) {
+        if ($material === null) {
             $material = new Material();
             $material->setAccount($account);
             $material->setMediaId($item['media_id']);
             $material->setType($type);
-            $material->setSyncing(true);
         }
 
         $material->setName($item['name'] ?? null);
@@ -120,7 +121,6 @@ class SyncMaterialCommand extends Command
             $material->setContent($item['content']);
         }
 
-        $material->setSyncing(true);
         $this->entityManager->persist($material);
     }
 }

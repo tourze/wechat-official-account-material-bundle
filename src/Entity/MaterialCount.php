@@ -5,22 +5,14 @@ namespace WechatOfficialAccountMaterialBundle\Entity;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Tourze\DoctrineTimestampBundle\Traits\TimestampableAware;
-use Tourze\EasyAdmin\Attribute\Action\Deletable;
-use Tourze\EasyAdmin\Attribute\Column\ExportColumn;
-use Tourze\EasyAdmin\Attribute\Column\ListColumn;
-use Tourze\EasyAdmin\Attribute\Permission\AsPermission;
 use WechatOfficialAccountBundle\Entity\Account;
 use WechatOfficialAccountMaterialBundle\Repository\MaterialCountRepository;
 
-#[AsPermission(title: '素材总数')]
-#[Deletable]
 #[ORM\Entity(repositoryClass: MaterialCountRepository::class)]
 #[ORM\Table(name: 'wechat_official_account_material_count', options: ['comment' => '素材总数'])]
-class MaterialCount
+class MaterialCount implements \Stringable
 {
     use TimestampableAware;
-    #[ListColumn(order: -1)]
-    #[ExportColumn]
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: Types::INTEGER, options: ['comment' => 'ID'])]
@@ -31,11 +23,16 @@ class MaterialCount
         return $this->id;
     }
 
+    public function __toString(): string
+    {
+        return sprintf('素材总数-%s', $this->date?->format('Y-m-d') ?? 'Unknown');
+    }
+
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
     private Account $account;
 
-    #[ORM\Column(type: Types::DATE_MUTABLE)]
+    #[ORM\Column(type: Types::DATE_IMMUTABLE, options: ['comment' => '日期'])]
     private ?\DateTimeInterface $date = null;
 
     #[ORM\Column(nullable: true, options: ['comment' => '语音总数量'])]

@@ -35,7 +35,7 @@ class MaterialListener
         if ($material->isSyncing()) {
             return;
         }
-        if ($material->getMediaId() || !$material->getLocalFile()) {
+        if ($material->getMediaId() !== null || $material->getLocalFile() === null) {
             return;
         }
 
@@ -84,7 +84,7 @@ class MaterialListener
         if ($material->isSyncing()) {
             return;
         }
-        if (!$material->getMediaId()) {
+        if ($material->getMediaId() === null) {
             return;
         }
 

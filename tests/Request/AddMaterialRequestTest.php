@@ -43,10 +43,7 @@ class AddMaterialRequestTest extends TestCase
         
         // 测试基本结构，不验证资源
         $options = $this->request->getRequestOptions();
-        
-        $this->assertIsArray($options);
         $this->assertArrayHasKey('multipart', $options);
-        $this->assertIsArray($options['multipart']);
         $this->assertCount(2, $options['multipart']);
         
         $this->assertSame('media', $options['multipart'][0]['name']);

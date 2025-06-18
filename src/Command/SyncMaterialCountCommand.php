@@ -21,9 +21,10 @@ use WechatOfficialAccountMaterialBundle\Request\GetMaterialCountRequest;
  * @see https://developers.weixin.qq.com/doc/offiaccount/Asset_Management/Get_the_total_of_all_materials.html
  */
 #[AsCronTask('0 */2 * * *')]
-#[AsCommand(name: 'wechat:official-account:SyncMaterialCountCommand', description: '公众号-获取素材总数')]
+#[AsCommand(name: 'wechat:official-account:sync-material-count', description: '公众号-获取素材总数')]
 class SyncMaterialCountCommand extends Command
 {
+    public const NAME = 'wechat:official-account:sync-material-count';
     public function __construct(
         private readonly AccountRepository $accountRepository,
         private readonly OfficialAccountClient $client,
@@ -35,7 +36,7 @@ class SyncMaterialCountCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        foreach ($this->accountRepository->findBy(['valid' => true]) as $account) {
+        foreach ($this->accountRepository->findBy(['valid' => 1]) as $account) {
             $now = Carbon::today();
             $request = new GetMaterialCountRequest();
             $request->setAccount($account);
@@ -48,7 +49,7 @@ class SyncMaterialCountCommand extends Command
                 'account' => $account,
                 'date' => $now,
             ]);
-            if (!$count) {
+            if ($count === null) {
                 $count = new MaterialCount();
                 $count->setAccount($account);
                 $count->setDate($now);
