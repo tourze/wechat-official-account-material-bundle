@@ -2,7 +2,7 @@
 
 namespace WechatOfficialAccountMaterialBundle\Command;
 
-use Carbon\Carbon;
+use Carbon\CarbonImmutable;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
@@ -21,7 +21,7 @@ use WechatOfficialAccountMaterialBundle\Request\GetMaterialCountRequest;
  * @see https://developers.weixin.qq.com/doc/offiaccount/Asset_Management/Get_the_total_of_all_materials.html
  */
 #[AsCronTask('0 */2 * * *')]
-#[AsCommand(name: 'wechat:official-account:sync-material-count', description: '公众号-获取素材总数')]
+#[AsCommand(name: self::NAME, description: '公众号-获取素材总数')]
 class SyncMaterialCountCommand extends Command
 {
     public const NAME = 'wechat:official-account:sync-material-count';
@@ -37,7 +37,7 @@ class SyncMaterialCountCommand extends Command
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         foreach ($this->accountRepository->findBy(['valid' => 1]) as $account) {
-            $now = Carbon::today();
+            $now = CarbonImmutable::today();
             $request = new GetMaterialCountRequest();
             $request->setAccount($account);
             $response = $this->client->request($request);

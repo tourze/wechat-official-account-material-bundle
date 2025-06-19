@@ -18,7 +18,7 @@ use WechatOfficialAccountMaterialBundle\Repository\MaterialRepository;
 use WechatOfficialAccountMaterialBundle\Request\BatchGetMaterialRequest;
 
 #[AsCommand(
-    name: 'wechat-official-account:material:sync',
+    name: self::NAME,
     description: '同步微信公众号永久素材',
 )]
 class SyncMaterialCommand extends Command

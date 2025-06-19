@@ -2,7 +2,7 @@
 
 namespace WechatOfficialAccountMaterialBundle\Tests\Command;
 
-use Carbon\Carbon;
+use Carbon\CarbonImmutable;
 use Doctrine\ORM\EntityManagerInterface;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Console\Application;
@@ -44,7 +44,7 @@ class SyncMaterialCountCommandTest extends TestCase
     public function testExecuteWithValidAccounts(): void
     {
         // 模拟当前日期
-        Carbon::setTestNow(Carbon::create(2023, 6, 15));
+        CarbonImmutable::setTestNow(CarbonImmutable::create(2023, 6, 15));
         
         // 准备测试数据
         $account = $this->createMock(Account::class);
@@ -94,7 +94,7 @@ class SyncMaterialCountCommandTest extends TestCase
         $this->assertEquals(Command::SUCCESS, $result);
         
         // 重置测试时间
-        Carbon::setTestNow();
+        CarbonImmutable::setTestNow();
     }
     
     public function testExecuteWithInvalidResponseFormat(): void

@@ -77,7 +77,7 @@ class MaterialCountTest extends TestCase
 
     public function testGetSetCreateTime(): void
     {
-        $dateTime = new \DateTime();
+        $dateTime = new \DateTimeImmutable();
         
         $this->materialCount->setCreateTime($dateTime);
         $this->assertSame($dateTime, $this->materialCount->getCreateTime());
@@ -85,7 +85,7 @@ class MaterialCountTest extends TestCase
 
     public function testGetSetUpdateTime(): void
     {
-        $dateTime = new \DateTime();
+        $dateTime = new \DateTimeImmutable();
         
         $this->materialCount->setUpdateTime($dateTime);
         $this->assertSame($dateTime, $this->materialCount->getUpdateTime());

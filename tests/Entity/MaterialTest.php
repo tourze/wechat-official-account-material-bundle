@@ -114,7 +114,7 @@ class MaterialTest extends TestCase
 
     public function testGetSetCreateTime(): void
     {
-        $dateTime = new \DateTime();
+        $dateTime = new \DateTimeImmutable();
         
         $this->material->setCreateTime($dateTime);
         $this->assertSame($dateTime, $this->material->getCreateTime());
@@ -122,7 +122,7 @@ class MaterialTest extends TestCase
 
     public function testGetSetUpdateTime(): void
     {
-        $dateTime = new \DateTime();
+        $dateTime = new \DateTimeImmutable();
         
         $this->material->setUpdateTime($dateTime);
         $this->assertSame($dateTime, $this->material->getUpdateTime());
