@@ -20,7 +20,7 @@ use WechatOfficialAccountMaterialBundle\Request\GetMaterialCountRequest;
  *
  * @see https://developers.weixin.qq.com/doc/offiaccount/Asset_Management/Get_the_total_of_all_materials.html
  */
-#[AsCronTask('0 */2 * * *')]
+#[AsCronTask(expression: '0 */2 * * *')]
 #[AsCommand(name: self::NAME, description: '公众号-获取素材总数')]
 class SyncMaterialCountCommand extends Command
 {

@@ -23,11 +23,6 @@ class UploadImageRequestTest extends TestCase
         $this->assertSame('https://api.weixin.qq.com/cgi-bin/media/uploadimg', $this->request->getRequestPath());
     }
 
-    public function testGetRequestOptions(): void
-    {
-        // 由于无法真实地打开文件，我们只测试请求选项的结构
-        $this->markTestSkipped('由于文件资源无法模拟，跳过此测试');
-    }
 
     public function testGetRequestMethod(): void
     {

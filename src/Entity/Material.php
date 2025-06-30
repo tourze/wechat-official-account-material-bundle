@@ -6,7 +6,7 @@ use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Tourze\DoctrineIpBundle\Attribute\CreateIpColumn;
 use Tourze\DoctrineIpBundle\Attribute\UpdateIpColumn;
-use Tourze\DoctrineSnowflakeBundle\Service\SnowflakeIdGenerator;
+use Tourze\DoctrineSnowflakeBundle\Traits\SnowflakeKeyAware;
 use Tourze\DoctrineTimestampBundle\Traits\TimestampableAware;
 use WechatOfficialAccountBundle\Entity\Account;
 use WechatOfficialAccountMaterialBundle\Enum\MaterialType;
@@ -23,11 +23,7 @@ use WechatOfficialAccountMaterialBundle\Repository\MaterialRepository;
 class Material implements \Stringable
 {
     use TimestampableAware;
-    #[ORM\Id]
-    #[ORM\GeneratedValue(strategy: 'CUSTOM')]
-    #[ORM\CustomIdGenerator(SnowflakeIdGenerator::class)]
-    #[ORM\Column(type: Types::BIGINT, nullable: false, options: ['comment' => 'ID'])]
-    private ?string $id = null;
+    use SnowflakeKeyAware;
 
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
@@ -61,10 +57,6 @@ class Material implements \Stringable
     #[ORM\Column(length: 128, nullable: true, options: ['comment' => '更新时IP'])]
     private ?string $updatedFromIp = null;
 
-    public function getId(): ?string
-    {
-        return $this->id;
-    }
 
     public function __toString(): string
     {

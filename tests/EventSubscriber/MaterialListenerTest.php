@@ -133,10 +133,4 @@ class MaterialListenerTest extends TestCase
             
         $this->listener->preRemove($material);
     }
-    
-    // prePersist方法需要跳过完整测试，因为无法模拟文件IO操作
-    public function testPrePersist_SuccessfulUpload(): void
-    {
-        $this->markTestSkipped('无法模拟文件操作，跳过此测试');
-    }
 } 
