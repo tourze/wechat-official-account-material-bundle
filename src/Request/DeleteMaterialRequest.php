@@ -3,6 +3,7 @@
 namespace WechatOfficialAccountMaterialBundle\Request;
 
 use WechatOfficialAccountBundle\Request\WithAccountRequest;
+use WechatOfficialAccountMaterialBundle\Exception\InvalidMaterialParameterException;
 
 /**
  * 删除永久素材
@@ -12,15 +13,18 @@ use WechatOfficialAccountBundle\Request\WithAccountRequest;
 class DeleteMaterialRequest extends WithAccountRequest
 {
     /**
-     * @var string 要删除的素材的media_id
+     * @var string|null 要删除的素材的media_id
      */
-    private string $mediaId;
+    private ?string $mediaId = null;
 
     public function getRequestPath(): string
     {
         return 'https://api.weixin.qq.com/cgi-bin/material/del_material';
     }
 
+    /**
+     * @return array<string, mixed>|null
+     */
     public function getRequestOptions(): ?array
     {
         $json = [
@@ -34,6 +38,10 @@ class DeleteMaterialRequest extends WithAccountRequest
 
     public function getMediaId(): string
     {
+        if (null === $this->mediaId) {
+            throw new InvalidMaterialParameterException('Media ID must be set before getting');
+        }
+
         return $this->mediaId;
     }
 

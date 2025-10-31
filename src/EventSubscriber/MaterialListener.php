@@ -8,6 +8,8 @@ use Doctrine\ORM\Events;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use WechatOfficialAccountBundle\Service\OfficialAccountClient;
 use WechatOfficialAccountMaterialBundle\Entity\Material;
+use WechatOfficialAccountMaterialBundle\Exception\InvalidMaterialParameterException;
+use WechatOfficialAccountMaterialBundle\Exception\MaterialUploadException;
 use WechatOfficialAccountMaterialBundle\Request\AddMaterialRequest;
 use WechatOfficialAccountMaterialBundle\Request\DeleteMaterialRequest;
 
@@ -18,7 +20,7 @@ use WechatOfficialAccountMaterialBundle\Request\DeleteMaterialRequest;
  * @see https://developers.weixin.qq.com/doc/offiaccount/Asset_Management/Deleting_Permanent_Assets.html 删除永久素材
  */
 #[AsEntityListener(event: Events::preRemove, method: 'preRemove', entity: Material::class)]
-#[AsEntityListener(event: Events::postPersist, method: 'postPersist', entity: Material::class)]
+#[AsEntityListener(event: Events::prePersist, method: 'prePersist', entity: Material::class)]
 class MaterialListener
 {
     public function __construct(
@@ -35,7 +37,7 @@ class MaterialListener
         if ($material->isSyncing()) {
             return;
         }
-        if ($material->getMediaId() !== null || $material->getLocalFile() === null) {
+        if (null !== $material->getMediaId() || null === $material->getLocalFile()) {
             return;
         }
 
@@ -44,11 +46,21 @@ class MaterialListener
         $request = new AddMaterialRequest();
         $request->setAccount($material->getAccount());
         $request->setFile($uploadFile);
-        $request->setType($material->getType());
+        $type = $material->getType();
+        if (null === $type) {
+            throw new InvalidMaterialParameterException('Material type must be set');
+        }
+        $request->setType($type);
 
         $response = $this->client->request($request);
-        $material->setMediaId($response['media_id']);
-        $material->setUrl($response['url']);
+
+        if (is_array($response) && isset($response['media_id']) && is_string($response['media_id'])) {
+            $material->setMediaId($response['media_id']);
+        }
+
+        if (is_array($response) && isset($response['url']) && is_string($response['url'])) {
+            $material->setUrl($response['url']);
+        }
 
         $this->entityManager->persist($material);
         $this->entityManager->flush();
@@ -59,8 +71,16 @@ class MaterialListener
      */
     private function generateUploadFileFromUrl(string $url): UploadedFile
     {
-        $content = file_get_contents($url);
+        $content = @file_get_contents($url);
+        if (false === $content) {
+            throw new MaterialUploadException('Cannot fetch content from URL: ' . $url);
+        }
+
         $file = tempnam(sys_get_temp_dir(), 'upload_file');
+        if (false === $file) {
+            throw new MaterialUploadException('Cannot create temporary file');
+        }
+
         file_put_contents($file, $content);
         $name = basename($url);
 
@@ -84,7 +104,7 @@ class MaterialListener
         if ($material->isSyncing()) {
             return;
         }
-        if ($material->getMediaId() === null) {
+        if (null === $material->getMediaId()) {
             return;
         }
 

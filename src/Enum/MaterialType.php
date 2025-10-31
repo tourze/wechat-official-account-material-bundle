@@ -3,13 +3,14 @@
 namespace WechatOfficialAccountMaterialBundle\Enum;
 
 use ChrisUllyott\FileSize;
+use Tourze\EnumExtra\BadgeInterface;
 use Tourze\EnumExtra\Itemable;
 use Tourze\EnumExtra\ItemTrait;
 use Tourze\EnumExtra\Labelable;
 use Tourze\EnumExtra\Selectable;
 use Tourze\EnumExtra\SelectTrait;
 
-enum MaterialType: string implements Labelable, Itemable, Selectable
+enum MaterialType: string implements Labelable, Itemable, Selectable, BadgeInterface
 {
     use ItemTrait;
     use SelectTrait;
@@ -29,6 +30,39 @@ enum MaterialType: string implements Labelable, Itemable, Selectable
         };
     }
 
+    public function getBadge(): string
+    {
+        return match ($this) {
+            self::IMAGE => 'success',
+            self::VOICE => 'info',
+            self::VIDEO => 'primary',
+            self::THUMB => 'secondary',
+        };
+    }
+
+    /**
+     * 获取所有枚举的选项数组（用于下拉列表等）
+     *
+     * @return array<int, array{value: string, label: string}>
+     */
+    public static function toSelectItems(): array
+    {
+        $result = [];
+        foreach (self::cases() as $case) {
+            $result[] = [
+                'value' => $case->value,
+                'label' => $case->getLabel(),
+            ];
+        }
+
+        return $result;
+    }
+
+    /**
+     * 获取允许的文件扩展名
+     *
+     * @return array<string>
+     */
     public function getAllowExtensions(): array
     {
         return match ($this) {
@@ -39,11 +73,15 @@ enum MaterialType: string implements Labelable, Itemable, Selectable
         };
     }
 
+    /**
+     * 获取最大文件大小
+     */
     public function getMaxFileSize(): FileSize
     {
         return match ($this) {
-            self::IMAGE, self::VIDEO => new FileSize('10M'),
-            self::VOICE => new FileSize('2M'),
+            self::IMAGE => new FileSize('10MB'),
+            self::VOICE => new FileSize('2MB'),
+            self::VIDEO => new FileSize('10MB'),
             self::THUMB => new FileSize('64KB'),
         };
     }

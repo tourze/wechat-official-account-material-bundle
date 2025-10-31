@@ -24,6 +24,7 @@ use WechatOfficialAccountMaterialBundle\Request\BatchGetMaterialRequest;
 class SyncMaterialCommand extends Command
 {
     public const NAME = 'wechat-official-account:material:sync';
+
     public function __construct(
         private readonly OfficialAccountClient $client,
         private readonly EntityManagerInterface $entityManager,
@@ -44,11 +45,13 @@ class SyncMaterialCommand extends Command
 
         // 获取需要同步的公众号列表
         $accounts = [];
+        /** @var mixed $accountId */
         $accountId = $input->getOption('account-id');
-        if ($accountId !== null) {
+        if (null !== $accountId) {
             $account = $this->accountRepository->find($accountId);
-            if ($account === null) {
-                $io->error(sprintf('公众号 %s 不存在', $accountId));
+            if (null === $account) {
+                $accountIdStr = is_scalar($accountId) ? (string) $accountId : '未知';
+                $io->error(sprintf('公众号 %s 不存在', $accountIdStr));
 
                 return Command::FAILURE;
             }
@@ -69,36 +72,81 @@ class SyncMaterialCommand extends Command
     {
         // 遍历所有素材类型
         foreach (MaterialType::cases() as $type) {
-            $io->text(sprintf('正在同步 %s 类型的素材', $type->value));
-
-            $offset = 0;
-            $count = 20; // 每次获取20条记录
-
-            do {
-                $request = new BatchGetMaterialRequest();
-                $request->setAccount($account);
-                $request->setType($type->value);
-                $request->setOffset($offset);
-                $request->setCount($count);
-
-                $response = $this->client->request($request);
-                $totalCount = $response['total_count'];
-                $items = $response['item'];
-
-                foreach ($items as $item) {
-                    $this->syncMaterial($account, $type, $item);
-                }
-
-                $offset += count($items);
-                $io->progressAdvance(count($items));
-            } while ($offset < $totalCount);
-
-            $io->progressFinish();
+            $this->syncMaterialsByType($account, $type, $io);
         }
 
         $this->entityManager->flush();
     }
 
+    private function syncMaterialsByType(Account $account, MaterialType $type, SymfonyStyle $io): void
+    {
+        $io->text(sprintf('正在同步 %s 类型的素材', $type->value));
+
+        $totalCount = $this->getTotalMaterialCount($account, $type);
+
+        if ($totalCount > 0) {
+            $io->progressStart($totalCount);
+            $this->fetchAndSyncMaterials($account, $type, $totalCount, $io);
+            $io->progressFinish();
+        }
+    }
+
+    private function getTotalMaterialCount(Account $account, MaterialType $type): int
+    {
+        $request = new BatchGetMaterialRequest();
+        $request->setAccount($account);
+        $request->setType($type->value);
+        $request->setOffset(0);
+        $request->setCount(1);
+
+        $response = $this->client->request($request);
+
+        /** @var array<string, mixed> $response */
+        $totalCount = $response['total_count'] ?? 0;
+        return is_numeric($totalCount) ? (int) $totalCount : 0;
+    }
+
+    private function fetchAndSyncMaterials(Account $account, MaterialType $type, int $totalCount, SymfonyStyle $io): void
+    {
+        $offset = 0;
+        $count = 20; // 每次获取20条记录
+
+        while ($offset < $totalCount) {
+            $items = $this->fetchMaterialBatch($account, $type, $offset, $count);
+
+            foreach ($items as $item) {
+                if (is_array($item)) {
+                    /** @var array<string, mixed> $item */
+                    $this->syncMaterial($account, $type, $item);
+                }
+            }
+
+            $offset += count($items);
+            $io->progressAdvance(count($items));
+        }
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function fetchMaterialBatch(Account $account, MaterialType $type, int $offset, int $count): array
+    {
+        $request = new BatchGetMaterialRequest();
+        $request->setAccount($account);
+        $request->setType($type->value);
+        $request->setOffset($offset);
+        $request->setCount($count);
+
+        $response = $this->client->request($request);
+
+        /** @var array<string, mixed> $response */
+        $items = $response['item'] ?? [];
+        return is_array($items) ? $items : [];
+    }
+
+    /**
+     * @param array<string, mixed> $item
+     */
     private function syncMaterial(Account $account, MaterialType $type, array $item): void
     {
         // 查找是否已存在
@@ -107,18 +155,23 @@ class SyncMaterialCommand extends Command
             'mediaId' => $item['media_id'],
         ]);
 
-        if ($material === null) {
+        if (null === $material) {
             $material = new Material();
             $material->setAccount($account);
-            $material->setMediaId($item['media_id']);
+            $mediaId = $item['media_id'] ?? null;
+            $material->setMediaId(is_string($mediaId) ? $mediaId : null);
             $material->setType($type);
         }
 
-        $material->setName($item['name'] ?? null);
-        $material->setUrl($item['url'] ?? null);
+        $name = $item['name'] ?? null;
+        $material->setName(is_string($name) ? $name : null);
+        $url = $item['url'] ?? null;
+        $material->setUrl(is_string($url) ? $url : null);
 
-        if (isset($item['content'])) {
-            $material->setContent($item['content']);
+        if (isset($item['content']) && is_array($item['content'])) {
+            $content = $item['content'];
+            /** @var array<string, mixed> $content */
+            $material->setContent($content);
         }
 
         $this->entityManager->persist($material);

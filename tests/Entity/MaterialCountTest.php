@@ -2,92 +2,63 @@
 
 namespace WechatOfficialAccountMaterialBundle\Tests\Entity;
 
-use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
+use Tourze\PHPUnitDoctrineEntity\AbstractEntityTestCase;
 use WechatOfficialAccountBundle\Entity\Account;
 use WechatOfficialAccountMaterialBundle\Entity\MaterialCount;
 
-class MaterialCountTest extends TestCase
+/**
+ * @internal
+ */
+#[CoversClass(MaterialCount::class)]
+final class MaterialCountTest extends AbstractEntityTestCase
 {
-    private MaterialCount $materialCount;
+    // private MaterialCount $materialCount; // AbstractEntityTest 不需要这个属性
 
     protected function setUp(): void
     {
-        $this->materialCount = new MaterialCount();
+        // Entity 测试中允许直接实例化，因为需要测试 Entity 的基本功能
+        // AbstractEntityTest 会自动测试所有 getter/setter 方法
     }
 
-    public function testGetId(): void
+    /**
+     * 创建被测实体的一个实例.
+     */
+    protected function createEntity(): MaterialCount
     {
-        // ID是由Doctrine生成的，我们不测试设置值，只测试初始值
-        $this->assertSame(0, $this->materialCount->getId());
+        return new MaterialCount();
     }
 
+    /**
+     * 提供属性及其样本值的 Data Provider.
+     *
+     * 注意：account 属性被跳过，因为它需要复杂的 Account 对象作为参数
+     * 该属性会在单独的测试方法中进行测试
+     */
+    /**
+     * @return iterable<string, array{string, mixed}>
+     */
+    public static function propertiesProvider(): iterable
+    {
+        yield 'date' => ['date', new \DateTime()];
+        yield 'voiceCount' => ['voiceCount', 10];
+        yield 'videoCount' => ['videoCount', 15];
+        yield 'imageCount' => ['imageCount', 20];
+        yield 'newsCount' => ['newsCount', 25];
+        yield 'createTime' => ['createTime', new \DateTimeImmutable()];
+        yield 'updateTime' => ['updateTime', new \DateTimeImmutable()];
+    }
+
+    /**
+     * 测试 account 属性的 getter/setter 方法
+     */
     public function testGetSetAccount(): void
     {
+        $entity = $this->createEntity();
         $account = $this->createMock(Account::class);
-        
-        $result = $this->materialCount->setAccount($account);
-        $this->assertSame($this->materialCount, $result);
-        $this->assertSame($account, $this->materialCount->getAccount());
-    }
 
-    public function testGetSetDate(): void
-    {
-        $date = new \DateTime();
-        
-        $result = $this->materialCount->setDate($date);
-        $this->assertSame($this->materialCount, $result);
-        $this->assertSame($date, $this->materialCount->getDate());
+        $entity->setAccount($account);
+        $this->assertSame($account, $entity->getAccount());
     }
-
-    public function testGetSetVoiceCount(): void
-    {
-        $count = 10;
-        
-        $result = $this->materialCount->setVoiceCount($count);
-        $this->assertSame($this->materialCount, $result);
-        $this->assertSame($count, $this->materialCount->getVoiceCount());
-    }
-
-    public function testGetSetVideoCount(): void
-    {
-        $count = 15;
-        
-        $result = $this->materialCount->setVideoCount($count);
-        $this->assertSame($this->materialCount, $result);
-        $this->assertSame($count, $this->materialCount->getVideoCount());
-    }
-
-    public function testGetSetImageCount(): void
-    {
-        $count = 20;
-        
-        $result = $this->materialCount->setImageCount($count);
-        $this->assertSame($this->materialCount, $result);
-        $this->assertSame($count, $this->materialCount->getImageCount());
-    }
-
-    public function testGetSetNewsCount(): void
-    {
-        $count = 25;
-        
-        $result = $this->materialCount->setNewsCount($count);
-        $this->assertSame($this->materialCount, $result);
-        $this->assertSame($count, $this->materialCount->getNewsCount());
-    }
-
-    public function testGetSetCreateTime(): void
-    {
-        $dateTime = new \DateTimeImmutable();
-        
-        $this->materialCount->setCreateTime($dateTime);
-        $this->assertSame($dateTime, $this->materialCount->getCreateTime());
-    }
-
-    public function testGetSetUpdateTime(): void
-    {
-        $dateTime = new \DateTimeImmutable();
-        
-        $this->materialCount->setUpdateTime($dateTime);
-        $this->assertSame($dateTime, $this->materialCount->getUpdateTime());
-    }
-} 
+}

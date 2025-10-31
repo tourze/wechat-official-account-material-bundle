@@ -4,6 +4,7 @@ namespace WechatOfficialAccountMaterialBundle\Entity;
 
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 use Tourze\DoctrineTimestampBundle\Traits\TimestampableAware;
 use WechatOfficialAccountBundle\Entity\Account;
 use WechatOfficialAccountMaterialBundle\Repository\MaterialCountRepository;
@@ -13,10 +14,11 @@ use WechatOfficialAccountMaterialBundle\Repository\MaterialCountRepository;
 class MaterialCount implements \Stringable
 {
     use TimestampableAware;
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: Types::INTEGER, options: ['comment' => 'ID'])]
-    private ?int $id = 0;
+    private ?int $id = null;
 
     public function getId(): ?int
     {
@@ -33,18 +35,23 @@ class MaterialCount implements \Stringable
     private Account $account;
 
     #[ORM\Column(type: Types::DATE_IMMUTABLE, options: ['comment' => '日期'])]
+    #[Assert\NotNull]
     private ?\DateTimeInterface $date = null;
 
     #[ORM\Column(nullable: true, options: ['comment' => '语音总数量'])]
+    #[Assert\PositiveOrZero]
     private ?int $voiceCount = null;
 
     #[ORM\Column(nullable: true, options: ['comment' => '视频总数量'])]
+    #[Assert\PositiveOrZero]
     private ?int $videoCount = null;
 
     #[ORM\Column(nullable: true, options: ['comment' => '图片总数量'])]
+    #[Assert\PositiveOrZero]
     private ?int $imageCount = null;
 
     #[ORM\Column(nullable: true, options: ['comment' => '图文总数量'])]
+    #[Assert\PositiveOrZero]
     private ?int $newsCount = null;
 
     public function getAccount(): Account
@@ -52,11 +59,9 @@ class MaterialCount implements \Stringable
         return $this->account;
     }
 
-    public function setAccount(Account $account): static
+    public function setAccount(Account $account): void
     {
         $this->account = $account;
-
-        return $this;
     }
 
     public function getDate(): ?\DateTimeInterface
@@ -64,11 +69,9 @@ class MaterialCount implements \Stringable
         return $this->date;
     }
 
-    public function setDate(\DateTimeInterface $date): static
+    public function setDate(\DateTimeInterface $date): void
     {
         $this->date = $date;
-
-        return $this;
     }
 
     public function getVoiceCount(): ?int
@@ -76,11 +79,9 @@ class MaterialCount implements \Stringable
         return $this->voiceCount;
     }
 
-    public function setVoiceCount(?int $voiceCount): static
+    public function setVoiceCount(?int $voiceCount): void
     {
         $this->voiceCount = $voiceCount;
-
-        return $this;
     }
 
     public function getVideoCount(): ?int
@@ -88,11 +89,9 @@ class MaterialCount implements \Stringable
         return $this->videoCount;
     }
 
-    public function setVideoCount(?int $videoCount): static
+    public function setVideoCount(?int $videoCount): void
     {
         $this->videoCount = $videoCount;
-
-        return $this;
     }
 
     public function getImageCount(): ?int
@@ -100,11 +99,9 @@ class MaterialCount implements \Stringable
         return $this->imageCount;
     }
 
-    public function setImageCount(?int $imageCount): static
+    public function setImageCount(?int $imageCount): void
     {
         $this->imageCount = $imageCount;
-
-        return $this;
     }
 
     public function getNewsCount(): ?int
@@ -112,9 +109,8 @@ class MaterialCount implements \Stringable
         return $this->newsCount;
     }
 
-    public function setNewsCount(?int $newsCount): static
+    public function setNewsCount(?int $newsCount): void
     {
         $this->newsCount = $newsCount;
-
-        return $this;
-    }}
+    }
+}

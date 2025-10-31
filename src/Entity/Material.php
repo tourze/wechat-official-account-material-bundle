@@ -4,8 +4,8 @@ namespace WechatOfficialAccountMaterialBundle\Entity;
 
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
-use Tourze\DoctrineIpBundle\Attribute\CreateIpColumn;
-use Tourze\DoctrineIpBundle\Attribute\UpdateIpColumn;
+use Symfony\Component\Validator\Constraints as Assert;
+use Tourze\DoctrineIpBundle\Traits\IpTraceableAware;
 use Tourze\DoctrineSnowflakeBundle\Traits\SnowflakeKeyAware;
 use Tourze\DoctrineTimestampBundle\Traits\TimestampableAware;
 use WechatOfficialAccountBundle\Entity\Account;
@@ -24,39 +24,40 @@ class Material implements \Stringable
 {
     use TimestampableAware;
     use SnowflakeKeyAware;
+    use IpTraceableAware;
 
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
     private Account $account;
 
     #[ORM\Column(length: 20, enumType: MaterialType::class, options: ['comment' => '媒体文件类型'])]
+    #[Assert\Choice(callback: [MaterialType::class, 'cases'])]
     private ?MaterialType $type = null;
 
     #[ORM\Column(length: 120, nullable: true, options: ['comment' => '永久素材的media_id'])]
+    #[Assert\Length(max: 120)]
     private ?string $mediaId = null;
 
     #[ORM\Column(length: 120, nullable: true, options: ['comment' => '素材名称'])]
+    #[Assert\Length(max: 120)]
     private ?string $name = null;
 
     #[ORM\Column(length: 255, nullable: true, options: ['comment' => '图片素材的图片URL'])]
+    #[Assert\Length(max: 255)]
+    #[Assert\Url]
     private ?string $url = null;
 
-    #[ORM\Column(nullable: true, options: ['comment' => '素材内容'])]
+    #[ORM\Column(type: Types::JSON, nullable: true, options: ['comment' => '素材内容'])]
+    #[Assert\Type(type: 'array')]
     private ?array $content = null;
 
     #[ORM\Column(length: 255, nullable: true, options: ['comment' => '本地文件路径'])]
+    #[Assert\Length(max: 255)]
     private ?string $localFile = null;
 
+    #[ORM\Column(type: Types::BOOLEAN, options: ['comment' => '是否正在同步中', 'default' => false])]
+    #[Assert\Type(type: 'bool')]
     private bool $syncing = false;
-
-    #[CreateIpColumn]
-    #[ORM\Column(length: 128, nullable: true, options: ['comment' => '创建时IP'])]
-    private ?string $createdFromIp = null;
-
-    #[UpdateIpColumn]
-    #[ORM\Column(length: 128, nullable: true, options: ['comment' => '更新时IP'])]
-    private ?string $updatedFromIp = null;
-
 
     public function __toString(): string
     {
@@ -68,11 +69,9 @@ class Material implements \Stringable
         return $this->syncing;
     }
 
-    public function setSyncing(bool $syncing): static
+    public function setSyncing(bool $syncing): void
     {
         $this->syncing = $syncing;
-
-        return $this;
     }
 
     public function getAccount(): Account
@@ -80,11 +79,9 @@ class Material implements \Stringable
         return $this->account;
     }
 
-    public function setAccount(Account $account): static
+    public function setAccount(Account $account): void
     {
         $this->account = $account;
-
-        return $this;
     }
 
     public function getType(): ?MaterialType
@@ -92,11 +89,9 @@ class Material implements \Stringable
         return $this->type;
     }
 
-    public function setType(MaterialType $type): static
+    public function setType(MaterialType $type): void
     {
         $this->type = $type;
-
-        return $this;
     }
 
     public function getMediaId(): ?string
@@ -104,11 +99,9 @@ class Material implements \Stringable
         return $this->mediaId;
     }
 
-    public function setMediaId(?string $mediaId): static
+    public function setMediaId(?string $mediaId): void
     {
         $this->mediaId = $mediaId;
-
-        return $this;
     }
 
     public function getName(): ?string
@@ -116,11 +109,9 @@ class Material implements \Stringable
         return $this->name;
     }
 
-    public function setName(?string $name): static
+    public function setName(?string $name): void
     {
         $this->name = $name;
-
-        return $this;
     }
 
     public function getUrl(): ?string
@@ -128,23 +119,25 @@ class Material implements \Stringable
         return $this->url;
     }
 
-    public function setUrl(?string $url): static
+    public function setUrl(?string $url): void
     {
         $this->url = $url;
-
-        return $this;
     }
 
+    /**
+     * @return array<string, mixed>|null
+     */
     public function getContent(): ?array
     {
         return $this->content;
     }
 
-    public function setContent(?array $content): static
+    /**
+     * @param array<string, mixed>|null $content
+     */
+    public function setContent(?array $content): void
     {
         $this->content = $content;
-
-        return $this;
     }
 
     public function getLocalFile(): ?string
@@ -152,33 +145,8 @@ class Material implements \Stringable
         return $this->localFile;
     }
 
-    public function setLocalFile(?string $localFile): static
+    public function setLocalFile(?string $localFile): void
     {
         $this->localFile = $localFile;
-
-        return $this;
     }
-
-    public function setCreatedFromIp(?string $createdFromIp): self
-    {
-        $this->createdFromIp = $createdFromIp;
-
-        return $this;
-    }
-
-    public function getCreatedFromIp(): ?string
-    {
-        return $this->createdFromIp;
-    }
-
-    public function setUpdatedFromIp(?string $updatedFromIp): self
-    {
-        $this->updatedFromIp = $updatedFromIp;
-
-        return $this;
-    }
-
-    public function getUpdatedFromIp(): ?string
-    {
-        return $this->updatedFromIp;
-    }}
+}

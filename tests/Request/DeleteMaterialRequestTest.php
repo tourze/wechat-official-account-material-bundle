@@ -2,18 +2,31 @@
 
 namespace WechatOfficialAccountMaterialBundle\Tests\Request;
 
-use PHPUnit\Framework\TestCase;
+use HttpClientBundle\Tests\Request\RequestTestCase;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 use WechatOfficialAccountBundle\Entity\Account;
 use WechatOfficialAccountMaterialBundle\Request\DeleteMaterialRequest;
 
-class DeleteMaterialRequestTest extends TestCase
+/**
+ * @internal
+ */
+#[CoversClass(DeleteMaterialRequest::class)]
+final class DeleteMaterialRequestTest extends RequestTestCase
 {
     private DeleteMaterialRequest $request;
+
     private Account $account;
 
     protected function setUp(): void
     {
+        // Request 测试中允许直接实例化，因为需要测试请求对象的基本功能
         $this->request = new DeleteMaterialRequest();
+
+        // 使用具体类 Account 是因为：
+        // 1) 该类是 Doctrine Entity，不存在对应的接口抽象
+        // 2) Request 类需要使用 Account 实例来处理微信 API 请求
+        // 3) 在单元测试中模拟 Entity 是常见且合理的做法
         $this->account = $this->createMock(Account::class);
         $this->request->setAccount($this->account);
     }
@@ -27,13 +40,13 @@ class DeleteMaterialRequestTest extends TestCase
     {
         $mediaId = 'test_media_id';
         $this->request->setMediaId($mediaId);
-        
+
         $expectedOptions = [
             'json' => [
                 'media_id' => $mediaId,
             ],
         ];
-        
+
         $this->assertEquals($expectedOptions, $this->request->getRequestOptions());
     }
 
@@ -43,4 +56,4 @@ class DeleteMaterialRequestTest extends TestCase
         $this->request->setMediaId($mediaId);
         $this->assertSame($mediaId, $this->request->getMediaId());
     }
-} 
+}

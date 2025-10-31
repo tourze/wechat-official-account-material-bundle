@@ -3,6 +3,8 @@
 namespace WechatOfficialAccountMaterialBundle\Request;
 
 use WechatOfficialAccountBundle\Request\WithAccountRequest;
+use WechatOfficialAccountMaterialBundle\Exception\InvalidMaterialParameterException;
+use WechatOfficialAccountMaterialBundle\Exception\MaterialUploadException;
 
 /**
  * 本接口所上传的图片不占用公众号的素材库中图片数量的100000个的限制。图片仅支持jpg/png格式，大小必须在1MB以下。
@@ -12,22 +14,36 @@ use WechatOfficialAccountBundle\Request\WithAccountRequest;
  */
 class UploadImageRequest extends WithAccountRequest
 {
-    private string $path;
+    private ?string $path = null;
 
     public function getRequestPath(): string
     {
         return 'https://api.weixin.qq.com/cgi-bin/media/uploadimg';
     }
 
+    /**
+     * @return array<string, mixed>|null
+     */
     public function getRequestOptions(): ?array
     {
+        if (null === $this->path) {
+            throw new InvalidMaterialParameterException('Path must be set before getting request options');
+        }
+
+        $resource = fopen($this->path, 'r');
+        if (false === $resource) {
+            throw new MaterialUploadException('Cannot open file: ' . $this->path);
+        }
+
         return [
             'headers' => [
                 'Content-Type' => 'image/png',
             ],
             'multipart' => [
-                'name' => 'media',
-                'contents' => fopen($this->getPath(), 'r'),
+                [
+                    'name' => 'media',
+                    'contents' => $resource,
+                ],
             ],
         ];
     }
@@ -39,6 +55,10 @@ class UploadImageRequest extends WithAccountRequest
 
     public function getPath(): string
     {
+        if (null === $this->path) {
+            throw new InvalidMaterialParameterException('Path must be set before getting');
+        }
+
         return $this->path;
     }
 

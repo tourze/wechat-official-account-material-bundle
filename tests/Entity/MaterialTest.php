@@ -2,129 +2,68 @@
 
 namespace WechatOfficialAccountMaterialBundle\Tests\Entity;
 
-use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
+use Tourze\PHPUnitDoctrineEntity\AbstractEntityTestCase;
 use WechatOfficialAccountBundle\Entity\Account;
 use WechatOfficialAccountMaterialBundle\Entity\Material;
 use WechatOfficialAccountMaterialBundle\Enum\MaterialType;
 
-class MaterialTest extends TestCase
+/**
+ * @internal
+ */
+#[CoversClass(Material::class)]
+final class MaterialTest extends AbstractEntityTestCase
 {
-    private Material $material;
+    // private Material $material; // AbstractEntityTest 不需要这个属性
 
     protected function setUp(): void
     {
-        $this->material = new Material();
+        // Entity 测试中允许直接实例化，因为需要测试 Entity 的基本功能
+        // AbstractEntityTest 会自动测试所有 getter/setter 方法
     }
 
-    public function testGetSetId(): void
+    /**
+     * 创建被测实体的一个实例.
+     */
+    protected function createEntity(): Material
     {
-        // ID是由Doctrine生成的，因此我们跳过对其进行设置的测试
-        $this->assertNull($this->material->getId());
+        return new Material();
     }
 
-    public function testGetSetSyncing(): void
+    /**
+     * 提供属性及其样本值的 Data Provider.
+     *
+     * 注意：account 属性被跳过，因为它需要复杂的 Account 对象作为参数
+     * 该属性会在单独的测试方法中进行测试
+     */
+    /**
+     * @return iterable<string, array{string, mixed}>
+     */
+    public static function propertiesProvider(): iterable
     {
-        $this->assertFalse($this->material->isSyncing());
-        
-        $result = $this->material->setSyncing(true);
-        $this->assertSame($this->material, $result);
-        $this->assertTrue($this->material->isSyncing());
+        yield 'syncing' => ['syncing', true];
+        yield 'type' => ['type', MaterialType::IMAGE];
+        yield 'mediaId' => ['mediaId', 'test_media_id'];
+        yield 'name' => ['name', 'test_name'];
+        yield 'url' => ['url', 'https://example.com/test.jpg'];
+        yield 'content' => ['content', ['key' => 'value']];
+        yield 'localFile' => ['localFile', 'path/to/local/file.jpg'];
+        yield 'createdFromIp' => ['createdFromIp', '192.168.1.1'];
+        yield 'updatedFromIp' => ['updatedFromIp', '192.168.1.2'];
+        yield 'createTime' => ['createTime', new \DateTimeImmutable()];
+        yield 'updateTime' => ['updateTime', new \DateTimeImmutable()];
     }
 
+    /**
+     * 测试 account 属性的 getter/setter 方法
+     */
     public function testGetSetAccount(): void
     {
+        $entity = $this->createEntity();
         $account = $this->createMock(Account::class);
-        
-        $result = $this->material->setAccount($account);
-        $this->assertSame($this->material, $result);
-        $this->assertSame($account, $this->material->getAccount());
-    }
 
-    public function testGetSetType(): void
-    {
-        $type = MaterialType::IMAGE;
-        
-        $result = $this->material->setType($type);
-        $this->assertSame($this->material, $result);
-        $this->assertSame($type, $this->material->getType());
+        $entity->setAccount($account);
+        $this->assertSame($account, $entity->getAccount());
     }
-
-    public function testGetSetMediaId(): void
-    {
-        $mediaId = 'test_media_id';
-        
-        $result = $this->material->setMediaId($mediaId);
-        $this->assertSame($this->material, $result);
-        $this->assertSame($mediaId, $this->material->getMediaId());
-    }
-
-    public function testGetSetName(): void
-    {
-        $name = 'test_name';
-        
-        $result = $this->material->setName($name);
-        $this->assertSame($this->material, $result);
-        $this->assertSame($name, $this->material->getName());
-    }
-
-    public function testGetSetUrl(): void
-    {
-        $url = 'https://example.com/test.jpg';
-        
-        $result = $this->material->setUrl($url);
-        $this->assertSame($this->material, $result);
-        $this->assertSame($url, $this->material->getUrl());
-    }
-
-    public function testGetSetContent(): void
-    {
-        $content = ['key' => 'value'];
-        
-        $result = $this->material->setContent($content);
-        $this->assertSame($this->material, $result);
-        $this->assertSame($content, $this->material->getContent());
-    }
-
-    public function testGetSetLocalFile(): void
-    {
-        $localFile = '/path/to/local/file.jpg';
-        
-        $result = $this->material->setLocalFile($localFile);
-        $this->assertSame($this->material, $result);
-        $this->assertSame($localFile, $this->material->getLocalFile());
-    }
-
-    public function testGetSetCreatedFromIp(): void
-    {
-        $ip = '192.168.1.1';
-        
-        $result = $this->material->setCreatedFromIp($ip);
-        $this->assertSame($this->material, $result);
-        $this->assertSame($ip, $this->material->getCreatedFromIp());
-    }
-
-    public function testGetSetUpdatedFromIp(): void
-    {
-        $ip = '192.168.1.2';
-        
-        $result = $this->material->setUpdatedFromIp($ip);
-        $this->assertSame($this->material, $result);
-        $this->assertSame($ip, $this->material->getUpdatedFromIp());
-    }
-
-    public function testGetSetCreateTime(): void
-    {
-        $dateTime = new \DateTimeImmutable();
-        
-        $this->material->setCreateTime($dateTime);
-        $this->assertSame($dateTime, $this->material->getCreateTime());
-    }
-
-    public function testGetSetUpdateTime(): void
-    {
-        $dateTime = new \DateTimeImmutable();
-        
-        $this->material->setUpdateTime($dateTime);
-        $this->assertSame($dateTime, $this->material->getUpdateTime());
-    }
-} 
+}

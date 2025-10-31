@@ -6,7 +6,11 @@ services:
 
   WechatOfficialAccountMaterialBundle\Command\:
     resource: '../../Command/'
+  WechatOfficialAccountMaterialBundle\Controller\:
+    resource: '../../Controller/'
   WechatOfficialAccountMaterialBundle\EventSubscriber\:
     resource: '../../EventSubscriber/'
   WechatOfficialAccountMaterialBundle\Repository\:
     resource: '../../Repository/'
+  WechatOfficialAccountMaterialBundle\Service\:
+    resource: '../../Service/'

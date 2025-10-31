@@ -25,6 +25,7 @@ use WechatOfficialAccountMaterialBundle\Request\GetMaterialCountRequest;
 class SyncMaterialCountCommand extends Command
 {
     public const NAME = 'wechat:official-account:sync-material-count';
+
     public function __construct(
         private readonly AccountRepository $accountRepository,
         private readonly OfficialAccountClient $client,
@@ -41,6 +42,8 @@ class SyncMaterialCountCommand extends Command
             $request = new GetMaterialCountRequest();
             $request->setAccount($account);
             $response = $this->client->request($request);
+
+            /** @var array<string, mixed> $response */
             if (!isset($response['voice_count'])) {
                 continue;
             }
@@ -49,15 +52,19 @@ class SyncMaterialCountCommand extends Command
                 'account' => $account,
                 'date' => $now,
             ]);
-            if ($count === null) {
+            if (null === $count) {
                 $count = new MaterialCount();
                 $count->setAccount($account);
                 $count->setDate($now);
             }
-            $count->setVoiceCount($response['voice_count']);
-            $count->setVideoCount($response['video_count']);
-            $count->setImageCount($response['image_count']);
-            $count->setNewsCount($response['news_count']);
+            $voiceCount = $response['voice_count'] ?? 0;
+            $count->setVoiceCount(is_numeric($voiceCount) ? (int) $voiceCount : 0);
+            $videoCount = $response['video_count'] ?? 0;
+            $count->setVideoCount(is_numeric($videoCount) ? (int) $videoCount : 0);
+            $imageCount = $response['image_count'] ?? 0;
+            $count->setImageCount(is_numeric($imageCount) ? (int) $imageCount : 0);
+            $newsCount = $response['news_count'] ?? 0;
+            $count->setNewsCount(is_numeric($newsCount) ? (int) $newsCount : 0);
             $this->entityManager->persist($count);
             $this->entityManager->flush();
         }

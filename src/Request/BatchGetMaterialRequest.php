@@ -3,6 +3,7 @@
 namespace WechatOfficialAccountMaterialBundle\Request;
 
 use WechatOfficialAccountBundle\Request\WithAccountRequest;
+use WechatOfficialAccountMaterialBundle\Exception\InvalidMaterialParameterException;
 
 /**
  * 获取素材列表
@@ -12,9 +13,9 @@ use WechatOfficialAccountBundle\Request\WithAccountRequest;
 class BatchGetMaterialRequest extends WithAccountRequest
 {
     /**
-     * @var string 素材的类型，图片（image）、视频（video）、语音 （voice）、图文（news）
+     * @var string|null 素材的类型，图片（image）、视频（video）、语音 （voice）、图文（news）
      */
-    private string $type;
+    private ?string $type = null;
 
     /**
      * @var int 从全部素材的该偏移位置开始返回，0表示从第一个素材 返回
@@ -31,6 +32,9 @@ class BatchGetMaterialRequest extends WithAccountRequest
         return 'https://api.weixin.qq.com/cgi-bin/material/batchget_material';
     }
 
+    /**
+     * @return array<string, mixed>|null
+     */
     public function getRequestOptions(): ?array
     {
         return [
@@ -44,6 +48,10 @@ class BatchGetMaterialRequest extends WithAccountRequest
 
     public function getType(): string
     {
+        if (null === $this->type) {
+            throw new InvalidMaterialParameterException('Type must be set before getting');
+        }
+
         return $this->type;
     }
 

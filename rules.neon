@@ -1,0 +1,6 @@
+parameters:
+    ignoreErrors:
+        # JSON字段在Doctrine中的类型声明是安全的，忽略PHPStan对array类型具体化的要求
+        -
+            message: '#Property WechatOfficialAccountMaterialBundle\\Entity\\Material::\$content type has no value type specified in iterable type array\.#'
+            path: src/Entity/Material.php

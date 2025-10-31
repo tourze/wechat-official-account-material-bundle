@@ -16,6 +16,9 @@ class GetMaterialCountRequest extends WithAccountRequest
         return 'https://api.weixin.qq.com/cgi-bin/material/get_materialcount';
     }
 
+    /**
+     * @return array<string, mixed>|null
+     */
     public function getRequestOptions(): ?array
     {
         return [];
