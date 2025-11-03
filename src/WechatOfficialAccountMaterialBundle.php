@@ -6,6 +6,7 @@ use Doctrine\Bundle\DoctrineBundle\DoctrineBundle;
 use Symfony\Component\HttpKernel\Bundle\Bundle;
 use Tourze\BundleDependency\BundleDependencyInterface;
 use WechatOfficialAccountBundle\WechatOfficialAccountBundle;
+use Tourze\EasyAdminMenuBundle\EasyAdminMenuBundle;
 
 class WechatOfficialAccountMaterialBundle extends Bundle implements BundleDependencyInterface
 {
@@ -14,6 +15,7 @@ class WechatOfficialAccountMaterialBundle extends Bundle implements BundleDepend
         return [
             DoctrineBundle::class => ['all' => true],
             WechatOfficialAccountBundle::class => ['all' => true],
+            EasyAdminMenuBundle::class => ['all' => true],
         ];
     }
 }
