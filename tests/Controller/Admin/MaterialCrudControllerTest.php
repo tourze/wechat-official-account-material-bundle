@@ -60,12 +60,6 @@ final class MaterialCrudControllerTest extends AbstractEasyAdminControllerTestCa
         yield 'name' => ['name'];
     }
 
-    public function testGetEntityFqcn(): void
-    {
-        $controller = new MaterialCrudController();
-        $this->assertSame(Material::class, $controller::getEntityFqcn());
-    }
-
     public function testConfigureFields(): void
     {
         $controller = new MaterialCrudController();

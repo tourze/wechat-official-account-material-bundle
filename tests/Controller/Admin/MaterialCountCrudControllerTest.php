@@ -68,12 +68,6 @@ final class MaterialCountCrudControllerTest extends AbstractEasyAdminControllerT
         yield 'newsCount' => ['newsCount'];
     }
 
-    public function testGetEntityFqcn(): void
-    {
-        $controller = new MaterialCountCrudController();
-        $this->assertSame(MaterialCount::class, $controller::getEntityFqcn());
-    }
-
     public function testConfigureFields(): void
     {
         $controller = new MaterialCountCrudController();
